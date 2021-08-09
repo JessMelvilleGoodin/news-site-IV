@@ -1,55 +1,43 @@
 import React, { Component } from 'react';
 import ArticleList from '../components/ArticleList/ArticleList.js'
-import { fetchArticles } from '../api/ArticlesAPI';
+import News from '../data/news.json';
+import {fetchArticleByID, fetchArticles, fetchArticlesBySection} from '../api/ArticlesAPI'
+import { useState, useEffect } from 'react';
 
-class HomePage extends Component {
-  state = {
-    articles: []
-  };
-
-  async componentDidMount() {
-    try {
-      const articlesJson = await fetchArticles();
-      this.setState({ articles: articlesJson });
-    } catch (e) {
-      console.error('error fetching articles: ', e);
+const HomePage = ({history}) => {
+  const [news, setNews] = useState()
+  
+  useEffect( () => {
+    const getNews = async () => {
+      const jsonResponse = await fetchArticles()
+      setNews(jsonResponse)
     }
-  }
+    getNews()
+  }, [])
 
-  render() {
-    return (
-      <div>
-        <ArticleList articles={this.state.articles} />
-      </div>
-    );
-  }
+
+    if (!news){
+      return <p>Loading...</p>
+    }
+    else {
+      return (
+        <div>
+          <ArticleList articles={news}
+            handleTitleClick={(articleID) => history.push(`/articles/${articleID}`) } />
+        </div>
+      );
+    }
 }
 
 export default HomePage;
 
 
 // Functional solution:
-// function HomePage(props) {
-//   const [ articles, setArticles ] = React.useState([]);
-
-//   React.useEffect(() => {
-//     const fetchArticlesAsync = async () => {
-//       try {
-//         const articlesJson = await fetchArticles();
-//         setArticles(articlesJson);
-//       } catch (e) {
-//         console.error('error fetching articles: ', e);
-//       }
-//     };
-
-//     if (!articles.length) {
-//       fetchArticlesAsync();
-//     }
-//   }, [articles])
-
+// function HomePage() {
 //   return (
 //     <div>
-//       <ArticleList articles={articles} />
+//       <ArticleList articles={News}
+//         handleTitleClick={(articleID) => props.history.push(`/articles/${articleID}`)} />
 //     </div>
 //   );
 // }
